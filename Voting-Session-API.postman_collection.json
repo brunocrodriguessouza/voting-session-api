@@ -1,0 +1,408 @@
+{
+	"info": {
+		"_postman_id": "voting-session-api-collection",
+		"name": "Voting Session API",
+		"description": "Collection para testar a API de gerenciamento de sessões de votação",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Agendas",
+			"item": [
+				{
+					"name": "Criar Pauta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('agendaId', response.id);",
+									"    pm.collectionVariables.set('agendaId', response.id);",
+									"    console.log('Agenda criada com ID:', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Pauta sobre orçamento anual\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas"
+							]
+						},
+						"description": "Cria uma nova pauta para votação. O ID da pauta é salvo automaticamente na variável agendaId."
+					},
+					"response": []
+				},
+				{
+					"name": "Obter Resultado da Votação",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/result",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"result"
+							]
+						},
+						"description": "Retorna o resultado da votação de uma pauta"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados a pautas"
+		},
+		{
+			"name": "Sessões",
+			"item": [
+				{
+					"name": "Abrir Sessão (1 minuto default)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/sessions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"sessions"
+							]
+						},
+						"description": "Abre uma sessão de votação com duração padrão de 1 minuto"
+					},
+					"response": []
+				},
+				{
+					"name": "Abrir Sessão (5 minutos)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/sessions?durationMinutes=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"sessions"
+							],
+							"query": [
+								{
+									"key": "durationMinutes",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Abre uma sessão de votação com duração customizada de 5 minutos"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados a sessões de votação"
+		},
+		{
+			"name": "Votos",
+			"item": [
+				{
+					"name": "Votar SIM",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"12345678901\",\n    \"choice\": \"YES\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/votes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"votes"
+							]
+						},
+						"description": "Registra um voto SIM para a pauta"
+					},
+					"response": []
+				},
+				{
+					"name": "Votar NÃO",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"98765432109\",\n    \"choice\": \"NO\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/votes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"votes"
+							]
+						},
+						"description": "Registra um voto NÃO para a pauta"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados a votos"
+		},
+		{
+			"name": "Fluxo Completo",
+			"item": [
+				{
+					"name": "1. Criar Pauta",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.environment.set('agendaId', response.id);",
+									"    pm.collectionVariables.set('agendaId', response.id);",
+									"    console.log('Agenda criada com ID:', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Aprovação de orçamento 2024\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Abrir Sessão",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/sessions?durationMinutes=2",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"sessions"
+							],
+							"query": [
+								{
+									"key": "durationMinutes",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Votar SIM (Associado 1)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"11111111111\",\n    \"choice\": \"YES\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/votes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Votar SIM (Associado 2)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"22222222222\",\n    \"choice\": \"YES\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/votes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Votar NÃO (Associado 3)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cpf\": \"33333333333\",\n    \"choice\": \"NO\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/votes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"votes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Obter Resultado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/result",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"result"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Fluxo completo de teste: criar pauta, abrir sessão, votar e ver resultado"
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "agendaId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+
