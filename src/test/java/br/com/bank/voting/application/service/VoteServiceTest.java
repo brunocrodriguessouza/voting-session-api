@@ -236,5 +236,34 @@ class VoteServiceTest {
 
         verify(voterEligibilityPort, never()).isEligibleToVote(any());
     }
+
+    @Test
+    @DisplayName("Deve mascarar CPF corretamente quando CPF é null")
+    void shouldMaskCpfCorrectlyWhenCpfIsNull() {
+        VoteCommand commandWithNullCpf = new VoteCommand(agendaId, null, VoteChoice.YES);
+        
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(openSession));
+        when(voteRepository.findByAgendaIdAndCpf(agendaId, null)).thenReturn(Optional.empty());
+        when(voterEligibilityPort.isEligibleToVote(null)).thenReturn(true);
+        when(voteRepository.save(any(Vote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertDoesNotThrow(() -> voteService.vote(commandWithNullCpf));
+    }
+
+    @Test
+    @DisplayName("Deve mascarar CPF corretamente quando CPF tem menos de 4 caracteres")
+    void shouldMaskCpfCorrectlyWhenCpfHasLessThan4Characters() {
+        String shortCpf = "123";
+        VoteCommand commandWithShortCpf = new VoteCommand(agendaId, shortCpf, VoteChoice.YES);
+        
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(openSession));
+        when(voteRepository.findByAgendaIdAndCpf(agendaId, shortCpf)).thenReturn(Optional.empty());
+        when(voterEligibilityPort.isEligibleToVote(shortCpf)).thenReturn(true);
+        when(voteRepository.save(any(Vote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertDoesNotThrow(() -> voteService.vote(commandWithShortCpf));
+    }
 }
 

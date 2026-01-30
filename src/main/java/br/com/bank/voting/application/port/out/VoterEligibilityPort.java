@@ -4,3 +4,4 @@ public interface VoterEligibilityPort {
     boolean isEligibleToVote(String cpf);
 }
 
+

@@ -8,6 +8,8 @@ import jakarta.validation.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -56,36 +58,19 @@ class GlobalExceptionHandlerTest {
         assertEquals("Session not found", response.getBody().message());
     }
 
-    @Test
-    @DisplayName("Deve tratar IllegalStateException com CONFLICT quando mensagem contém 'closed'")
-    void shouldHandleIllegalStateExceptionWithConflictForClosed() {
-        IllegalStateException ex = new IllegalStateException("Session is closed");
+    @ParameterizedTest
+    @CsvSource({
+        "Session is closed, 409",
+        "Session already open, 409",
+        "Associate is not eligible, 403"
+    })
+    @DisplayName("Deve tratar IllegalStateException com status HTTP apropriado")
+    void shouldHandleIllegalStateExceptionWithAppropriateStatus(String message, int expectedStatusCode) {
+        IllegalStateException ex = new IllegalStateException(message);
 
         ResponseEntity<ErrorResponse> response = handler.handleIllegalStateException(ex);
 
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("BUSINESS_RULE_VIOLATION", response.getBody().code());
-    }
-
-    @Test
-    @DisplayName("Deve tratar IllegalStateException com CONFLICT quando mensagem contém 'already'")
-    void shouldHandleIllegalStateExceptionWithConflictForAlready() {
-        IllegalStateException ex = new IllegalStateException("Session already open");
-
-        ResponseEntity<ErrorResponse> response = handler.handleIllegalStateException(ex);
-
-        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-        assertEquals("BUSINESS_RULE_VIOLATION", response.getBody().code());
-    }
-
-    @Test
-    @DisplayName("Deve tratar IllegalStateException com FORBIDDEN quando mensagem contém 'not eligible'")
-    void shouldHandleIllegalStateExceptionWithForbidden() {
-        IllegalStateException ex = new IllegalStateException("Associate is not eligible");
-
-        ResponseEntity<ErrorResponse> response = handler.handleIllegalStateException(ex);
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(expectedStatusCode, response.getStatusCode().value());
         assertEquals("BUSINESS_RULE_VIOLATION", response.getBody().code());
     }
 
@@ -215,4 +200,5 @@ class GlobalExceptionHandlerTest {
         assertEquals("An unexpected error occurred", response.getBody().message());
     }
 }
+
 

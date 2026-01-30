@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -90,5 +91,42 @@ class SessionControllerTest {
         assertEquals(sessionId, response.getBody().sessionId());
         assertEquals(SessionStatus.OPEN, response.getBody().status());
         verify(openSessionUseCase).open(any(OpenSessionCommand.class));
+    }
+
+    @Test
+    @DisplayName("Deve criar OpenSessionCommand com duração correta")
+    void shouldCreateOpenSessionCommandWithCorrectDuration() {
+        LocalDateTime now = LocalDateTime.now();
+        SessionOpenedResult result = new SessionOpenedResult(
+                sessionId, agendaId, now, now.plusMinutes(10), SessionStatus.OPEN
+        );
+
+        when(openSessionUseCase.open(any(OpenSessionCommand.class))).thenReturn(result);
+
+        controller.openSession(agendaId, 10);
+
+        verify(openSessionUseCase).open(argThat(command ->
+                command.agendaId().equals(agendaId) &&
+                command.durationMinutes() != null &&
+                command.durationMinutes() == 10
+        ));
+    }
+
+    @Test
+    @DisplayName("Deve criar OpenSessionCommand com duração null quando não informada")
+    void shouldCreateOpenSessionCommandWithNullDuration() {
+        LocalDateTime now = LocalDateTime.now();
+        SessionOpenedResult result = new SessionOpenedResult(
+                sessionId, agendaId, now, now.plusMinutes(1), SessionStatus.OPEN
+        );
+
+        when(openSessionUseCase.open(any(OpenSessionCommand.class))).thenReturn(result);
+
+        controller.openSession(agendaId, null);
+
+        verify(openSessionUseCase).open(argThat(command ->
+                command.agendaId().equals(agendaId) &&
+                command.durationMinutes() == null
+        ));
     }
 }

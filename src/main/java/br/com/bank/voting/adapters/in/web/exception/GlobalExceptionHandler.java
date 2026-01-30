@@ -41,13 +41,10 @@ public class GlobalExceptionHandler {
         
         if (message.contains("not found")) {
             status = HttpStatus.NOT_FOUND;
-        } else if (message.contains("closed")) {
-            status = HttpStatus.CONFLICT;
-        } else if (message.contains("already")) {
-            status = HttpStatus.CONFLICT;
         } else if (message.contains("not eligible")) {
             status = HttpStatus.FORBIDDEN;
         }
+        // Para "closed" e "already", mantém CONFLICT (já é o padrão)
         
         log.warn("Business rule violation: {}", message);
         ErrorResponse error = new ErrorResponse("BUSINESS_RULE_VIOLATION", message);

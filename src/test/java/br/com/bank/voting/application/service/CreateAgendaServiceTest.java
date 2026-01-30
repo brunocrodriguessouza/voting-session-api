@@ -89,5 +89,27 @@ class CreateAgendaServiceTest {
         assertNotNull(result.createdAt());
         verify(agendaRepository).save(argThat(agenda -> agenda.getCreatedAt() != null));
     }
+
+    @Test
+    @DisplayName("Deve criar pauta com diferentes títulos")
+    void shouldCreateAgendaWithDifferentTitles() {
+        CreateAgendaCommand command1 = new CreateAgendaCommand("Pauta 1");
+        CreateAgendaCommand command2 = new CreateAgendaCommand("Pauta 2");
+        
+        Agenda agenda1 = new Agenda(UUID.randomUUID(), "Pauta 1", LocalDateTime.now());
+        Agenda agenda2 = new Agenda(UUID.randomUUID(), "Pauta 2", LocalDateTime.now());
+        
+        when(agendaRepository.save(any(Agenda.class)))
+                .thenReturn(agenda1)
+                .thenReturn(agenda2);
+
+        AgendaCreatedResult result1 = createAgendaService.create(command1);
+        AgendaCreatedResult result2 = createAgendaService.create(command2);
+
+        assertEquals("Pauta 1", result1.title());
+        assertEquals("Pauta 2", result2.title());
+        verify(agendaRepository, times(2)).save(any(Agenda.class));
+    }
 }
+
 

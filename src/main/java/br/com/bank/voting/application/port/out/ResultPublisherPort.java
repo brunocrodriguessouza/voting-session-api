@@ -6,3 +6,4 @@ public interface ResultPublisherPort {
     void publishResult(VotingResultResult result);
 }
 
+

@@ -80,19 +80,19 @@ class VoteJpaAdapterTest {
     @DisplayName("Deve salvar voto sem ID e permitir JPA gerar")
     void shouldSaveVoteWithoutId() {
         Vote voteWithoutId = new Vote(null, agendaId, cpf, VoteChoice.NO, LocalDateTime.now());
-        VoteEntity savedEntity = new VoteEntity();
-        savedEntity.setId(voteId);
-        savedEntity.setAgendaId(agendaId);
-        savedEntity.setCpf(cpf);
-        savedEntity.setChoice("NO");
-        savedEntity.setCreatedAt(voteWithoutId.getCreatedAt());
+        VoteEntity expectedEntity = new VoteEntity();
+        expectedEntity.setId(voteId);
+        expectedEntity.setAgendaId(agendaId);
+        expectedEntity.setCpf(cpf);
+        expectedEntity.setChoice("NO");
+        expectedEntity.setCreatedAt(voteWithoutId.getCreatedAt());
         
-        when(repository.save(any(VoteEntity.class))).thenReturn(savedEntity);
+        when(repository.save(any(VoteEntity.class))).thenReturn(expectedEntity);
 
         Vote saved = adapter.save(voteWithoutId);
 
         assertNotNull(saved.getId());
-        verify(repository).save(argThat(entity -> entity.getId() == null));
+        verify(repository).save(argThat(entityToSave -> entityToSave.getId() == null));
     }
 
     @Test
@@ -178,22 +178,22 @@ class VoteJpaAdapterTest {
     @Test
     @DisplayName("Deve converter corretamente de Domain para Entity")
     void shouldConvertDomainToEntityCorrectly() {
-        VoteEntity savedEntity = new VoteEntity();
-        savedEntity.setId(voteId);
-        savedEntity.setAgendaId(domainVote.getAgendaId());
-        savedEntity.setCpf(domainVote.getCpf());
-        savedEntity.setChoice(domainVote.getChoice().name());
-        savedEntity.setCreatedAt(domainVote.getCreatedAt());
+        VoteEntity expectedEntity = new VoteEntity();
+        expectedEntity.setId(voteId);
+        expectedEntity.setAgendaId(domainVote.getAgendaId());
+        expectedEntity.setCpf(domainVote.getCpf());
+        expectedEntity.setChoice(domainVote.getChoice().name());
+        expectedEntity.setCreatedAt(domainVote.getCreatedAt());
         
-        when(repository.save(any(VoteEntity.class))).thenReturn(savedEntity);
+        when(repository.save(any(VoteEntity.class))).thenReturn(expectedEntity);
 
         adapter.save(domainVote);
 
-        verify(repository).save(argThat(entity -> 
-            entity.getAgendaId().equals(domainVote.getAgendaId()) &&
-            entity.getCpf().equals(domainVote.getCpf()) &&
-            entity.getChoice().equals(domainVote.getChoice().name()) &&
-            entity.getCreatedAt().equals(domainVote.getCreatedAt())
+        verify(repository).save(argThat(entityToSave -> 
+            entityToSave.getAgendaId().equals(domainVote.getAgendaId()) &&
+            entityToSave.getCpf().equals(domainVote.getCpf()) &&
+            entityToSave.getChoice().equals(domainVote.getChoice().name()) &&
+            entityToSave.getCreatedAt().equals(domainVote.getCreatedAt())
         ));
     }
 
@@ -214,5 +214,57 @@ class VoteJpaAdapterTest {
 
         assertEquals(VoteChoice.NO, saved.getChoice());
     }
+
+    @Test
+    @DisplayName("Deve salvar voto com ID existente")
+    void shouldSaveVoteWithExistingId() {
+        Vote voteWithId = new Vote(voteId, agendaId, cpf, VoteChoice.YES, LocalDateTime.now());
+        VoteEntity savedEntity = new VoteEntity();
+        savedEntity.setId(voteId);
+        savedEntity.setAgendaId(agendaId);
+        savedEntity.setCpf(cpf);
+        savedEntity.setChoice("YES");
+        savedEntity.setCreatedAt(voteWithId.getCreatedAt());
+        
+        when(repository.save(any(VoteEntity.class))).thenReturn(savedEntity);
+
+        Vote saved = adapter.save(voteWithId);
+
+        assertNotNull(saved);
+        assertEquals(voteId, saved.getId());
+        verify(repository).save(argThat(entityToSave -> 
+            entityToSave.getId() != null &&
+            entityToSave.getId().equals(voteId)
+        ));
+    }
+
+    @Test
+    @DisplayName("Deve converter lista de votos corretamente")
+    void shouldConvertListOfVotesCorrectly() {
+        VoteEntity entity1 = new VoteEntity();
+        entity1.setId(UUID.randomUUID());
+        entity1.setAgendaId(agendaId);
+        entity1.setCpf("11111111111");
+        entity1.setChoice("YES");
+        entity1.setCreatedAt(LocalDateTime.now());
+
+        VoteEntity entity2 = new VoteEntity();
+        entity2.setId(UUID.randomUUID());
+        entity2.setAgendaId(agendaId);
+        entity2.setCpf("22222222222");
+        entity2.setChoice("NO");
+        entity2.setCreatedAt(LocalDateTime.now());
+
+        when(repository.findAllByAgendaId(agendaId)).thenReturn(Arrays.asList(entity1, entity2));
+
+        List<Vote> votes = adapter.findAllByAgendaId(agendaId);
+
+        assertEquals(2, votes.size());
+        assertEquals(VoteChoice.YES, votes.get(0).getChoice());
+        assertEquals(VoteChoice.NO, votes.get(1).getChoice());
+        assertEquals("11111111111", votes.get(0).getCpf());
+        assertEquals("22222222222", votes.get(1).getCpf());
+    }
 }
+
 

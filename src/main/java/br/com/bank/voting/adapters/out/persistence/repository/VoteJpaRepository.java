@@ -14,3 +14,4 @@ public interface VoteJpaRepository extends JpaRepository<VoteEntity, UUID> {
     List<VoteEntity> findAllByAgendaId(UUID agendaId);
 }
 
+

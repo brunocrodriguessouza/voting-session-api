@@ -9,15 +9,12 @@ import br.com.bank.voting.application.port.out.VoterEligibilityPort;
 import br.com.bank.voting.domain.model.Vote;
 import br.com.bank.voting.domain.model.VotingSession;
 import br.com.bank.voting.domain.rules.SessionRules;
-import br.com.bank.voting.domain.rules.VoteRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Service responsável por registrar votos dos associados em pautas.
@@ -56,8 +53,10 @@ public class VoteService implements VoteUseCase {
     @Override
     @Transactional
     public void vote(VoteCommand command) {
-        log.info("Processing vote for agenda: {}, CPF: {}, Choice: {}", 
-                command.agendaId(), maskCpf(command.cpf()), command.choice());
+        if (log.isInfoEnabled()) {
+            log.info("Processing vote for agenda: {}, CPF: {}, Choice: {}", 
+                    command.agendaId(), maskCpf(command.cpf()), command.choice());
+        }
         
         agendaRepository.findById(command.agendaId())
                 .orElseThrow(() -> {
@@ -85,7 +84,8 @@ public class VoteService implements VoteUseCase {
                 });
 
         if (!voterEligibilityPort.isEligibleToVote(command.cpf())) {
-            log.error("Associate is not eligible to vote. CPF: {}", maskCpf(command.cpf()));
+            String maskedCpf = maskCpf(command.cpf());
+            log.error("Associate is not eligible to vote. CPF: {}", maskedCpf);
             throw new IllegalStateException("Associate is not eligible to vote");
         }
 
@@ -98,8 +98,10 @@ public class VoteService implements VoteUseCase {
         );
 
         voteRepository.save(vote);
-        log.info("Vote registered successfully for agenda: {}, CPF: {}", 
-                command.agendaId(), maskCpf(command.cpf()));
+        if (log.isInfoEnabled()) {
+            log.info("Vote registered successfully for agenda: {}, CPF: {}", 
+                    command.agendaId(), maskCpf(command.cpf()));
+        }
     }
 
     private String maskCpf(String cpf) {

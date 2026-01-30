@@ -50,8 +50,6 @@ class OpenSessionServiceTest {
     @DisplayName("Deve abrir sessão com duração padrão de 1 minuto quando durationMinutes for null")
     void shouldOpenSessionWithDefaultDurationWhenDurationMinutesIsNull() {
         OpenSessionCommand command = new OpenSessionCommand(agendaId, null);
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime closesAt = now.plusMinutes(1);
 
         when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
         when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.empty());
@@ -79,7 +77,6 @@ class OpenSessionServiceTest {
     void shouldOpenSessionWithCustomDurationWhenDurationMinutesIsProvided() {
         int customDuration = 5;
         OpenSessionCommand command = new OpenSessionCommand(agendaId, customDuration);
-        LocalDateTime now = LocalDateTime.now();
 
         when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
         when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.empty());
@@ -179,4 +176,5 @@ class OpenSessionServiceTest {
         assertEquals(duration, minutesDifference);
     }
 }
+
 

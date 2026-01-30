@@ -12,3 +12,4 @@ public interface VoteRepositoryPort {
     List<Vote> findAllByAgendaId(UUID agendaId);
 }
 
+

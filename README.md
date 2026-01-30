@@ -89,10 +89,17 @@ Cobertura de testes unitários para serviços, regras de negócio e adapters.
 Para gerar relatório de cobertura:
 
 ```bash
+# Opção 1: Executar testes e gerar relatório
+mvn clean test
+
+# Opção 2: Forçar geração do relatório
 mvn clean test jacoco:report
 ```
 
-O relatório estará disponível em: `target/site/jacoco/index.html`
+**Relatórios gerados:**
+- HTML: `target/site/jacoco/index.html` (abra no navegador)
+- XML: `target/site/jacoco/jacoco.xml` (usado pelo SonarQube)
+- Exec: `target/jacoco.exec` (dados brutos de cobertura)
 
 ### SonarQube (Opcional)
 

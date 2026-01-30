@@ -8,3 +8,4 @@ public interface GetResultUseCase {
     VotingResultResult getResult(UUID agendaId);
 }
 
+

@@ -3,6 +3,8 @@ package br.com.bank.voting.domain.rules;
 import br.com.bank.voting.domain.model.VotingSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -60,37 +62,21 @@ class SessionRulesTest {
         assertFalse(SessionRules.isSessionOpen(session, now));
     }
 
-    @Test
-    @DisplayName("Deve calcular corretamente o horário de fechamento com 1 minuto")
-    void shouldCalculateClosingTimeWithOneMinute() {
-        LocalDateTime openedAt = LocalDateTime.of(2026, 1, 29, 10, 0, 0);
-        LocalDateTime expected = LocalDateTime.of(2026, 1, 29, 10, 1, 0);
+    @ParameterizedTest
+    @CsvSource({
+        "2026-01-29T10:00:00, 1, 2026-01-29T10:01:00",
+        "2026-01-29T10:00:00, 15, 2026-01-29T10:15:00",
+        "2026-01-29T10:00:00, 60, 2026-01-29T11:00:00"
+    })
+    @DisplayName("Deve calcular corretamente o horário de fechamento")
+    void shouldCalculateClosingTimeCorrectly(String openedAtStr, int durationMinutes, String expectedStr) {
+        LocalDateTime openedAt = LocalDateTime.parse(openedAtStr);
+        LocalDateTime expected = LocalDateTime.parse(expectedStr);
 
-        LocalDateTime result = SessionRules.calculateClosingTime(openedAt, 1);
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    @DisplayName("Deve calcular corretamente o horário de fechamento com múltiplos minutos")
-    void shouldCalculateClosingTimeWithMultipleMinutes() {
-        LocalDateTime openedAt = LocalDateTime.of(2026, 1, 29, 10, 0, 0);
-        LocalDateTime expected = LocalDateTime.of(2026, 1, 29, 10, 15, 0);
-
-        LocalDateTime result = SessionRules.calculateClosingTime(openedAt, 15);
-
-        assertEquals(expected, result);
-    }
-
-    @Test
-    @DisplayName("Deve calcular corretamente o horário de fechamento com 60 minutos")
-    void shouldCalculateClosingTimeWithSixtyMinutes() {
-        LocalDateTime openedAt = LocalDateTime.of(2026, 1, 29, 10, 0, 0);
-        LocalDateTime expected = LocalDateTime.of(2026, 1, 29, 11, 0, 0);
-
-        LocalDateTime result = SessionRules.calculateClosingTime(openedAt, 60);
+        LocalDateTime result = SessionRules.calculateClosingTime(openedAt, durationMinutes);
 
         assertEquals(expected, result);
     }
 }
+
 

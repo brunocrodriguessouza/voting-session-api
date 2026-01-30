@@ -1,9 +1,6 @@
 package br.com.bank.voting.adapters.in.web;
 
-import br.com.bank.voting.adapters.out.external.UserInfoClientAdapter;
 import br.com.bank.voting.adapters.out.external.dto.UserInfoResponse;
-import br.com.bank.voting.adapters.out.external.exception.ExternalServiceUnavailableException;
-import br.com.bank.voting.adapters.out.external.exception.InvalidCpfException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +24,9 @@ public class ExternalServiceTestController {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalServiceTestController.class);
     
+    private static final String KEY_EXISTS = "exists";
+    private static final String KEY_MESSAGE = "message";
+    
     private final RestClient restClient;
 
     public ExternalServiceTestController() {
@@ -48,7 +48,9 @@ public class ExternalServiceTestController {
             @Parameter(description = "CPF a ser testado (11 dígitos)") 
             @PathVariable String cpf) {
         
-        log.info("Testing CPF in external service: {}", maskCpf(cpf));
+        if (log.isInfoEnabled()) {
+            log.info("Testing CPF in external service: {}", maskCpf(cpf));
+        }
         
         Map<String, Object> result = new HashMap<>();
         result.put("cpf", maskCpf(cpf));
@@ -60,28 +62,28 @@ public class ExternalServiceTestController {
                     .body(UserInfoResponse.class);
             
             if (response != null) {
-                result.put("exists", true);
+                result.put(KEY_EXISTS, true);
                 result.put("status", response.status());
                 result.put("eligible", "ABLE_TO_VOTE".equals(response.status()));
-                result.put("message", "CPF encontrado no serviço externo");
+                result.put(KEY_MESSAGE, "CPF encontrado no serviço externo");
             } else {
-                result.put("exists", false);
-                result.put("message", "Resposta nula do serviço externo");
+                result.put(KEY_EXISTS, false);
+                result.put(KEY_MESSAGE, "Resposta nula do serviço externo");
             }
             
             return ResponseEntity.ok(result);
             
         } catch (org.springframework.web.client.HttpClientErrorException.NotFound e) {
-            result.put("exists", false);
+            result.put(KEY_EXISTS, false);
             result.put("status", "NOT_FOUND");
             result.put("eligible", false);
-            result.put("message", "CPF não encontrado no serviço externo (404)");
+            result.put(KEY_MESSAGE, "CPF não encontrado no serviço externo (404)");
             return ResponseEntity.ok(result);
             
         } catch (Exception e) {
-            result.put("exists", false);
+            result.put(KEY_EXISTS, false);
             result.put("error", e.getClass().getSimpleName());
-            result.put("message", "Erro ao consultar serviço externo: " + e.getMessage());
+            result.put(KEY_MESSAGE, "Erro ao consultar serviço externo: " + e.getMessage());
             return ResponseEntity.status(500).body(result);
         }
     }

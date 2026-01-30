@@ -129,6 +129,28 @@ class InMemoryMessageQueueTest {
         messages.forEach(msg -> assertEquals(result.agendaId(), msg.result().agendaId()));
     }
 
+    @Test
+    @DisplayName("Deve remover mensagem mais antiga quando fila estiver cheia")
+    void shouldRemoveOldestMessageWhenQueueIsFull() {
+        // Preencher a fila até a capacidade (1000)
+        for (int i = 0; i < 1000; i++) {
+            messageQueue.publish(createTestResult(UUID.randomUUID()));
+        }
+        
+        assertEquals(1000, messageQueue.getMessageCount());
+        
+        // Adicionar mais uma mensagem (deve remover a mais antiga)
+        VotingResultResult newResult = createTestResult(UUID.randomUUID());
+        messageQueue.publish(newResult);
+        
+        // Ainda deve ter 1000 mensagens
+        assertEquals(1000, messageQueue.getMessageCount());
+        
+        // A última mensagem deve ser a nova
+        List<InMemoryMessageQueue.PublishedResult> messages = messageQueue.getAllMessages();
+        assertEquals(newResult.agendaId(), messages.get(messages.size() - 1).result().agendaId());
+    }
+
     private VotingResultResult createTestResult() {
         return createTestResult(UUID.randomUUID());
     }

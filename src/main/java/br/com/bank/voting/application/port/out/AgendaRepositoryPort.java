@@ -10,3 +10,4 @@ public interface AgendaRepositoryPort {
     Optional<Agenda> findById(UUID id);
 }
 
+

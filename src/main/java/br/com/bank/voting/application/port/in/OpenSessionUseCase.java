@@ -7,3 +7,4 @@ public interface OpenSessionUseCase {
     SessionOpenedResult open(OpenSessionCommand command);
 }
 
+

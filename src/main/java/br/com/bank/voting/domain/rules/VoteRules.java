@@ -11,6 +11,10 @@ import java.util.List;
  */
 public class VoteRules {
 
+    private VoteRules() {
+        // Utility class - não deve ser instanciada
+    }
+
     /**
      * Verifica se um associado já votou em uma lista de votos.
      *

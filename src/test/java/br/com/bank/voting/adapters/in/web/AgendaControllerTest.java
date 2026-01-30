@@ -88,5 +88,47 @@ class AgendaControllerTest {
         assertEquals(VotingResult.APPROVED, response.getBody().result());
         verify(getResultUseCase).getResult(agendaId);
     }
+
+    @Test
+    @DisplayName("Deve obter resultado com sessão aberta")
+    void shouldGetResultWithOpenSession() {
+        VotingResultResult result = new VotingResultResult(
+                agendaId,
+                SessionStatus.OPEN,
+                3L,
+                2L,
+                5L,
+                VotingResult.APPROVED
+        );
+
+        when(getResultUseCase.getResult(agendaId)).thenReturn(result);
+
+        ResponseEntity<VotingResultResult> response = controller.getResult(agendaId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(SessionStatus.OPEN, response.getBody().sessionStatus());
+        verify(getResultUseCase).getResult(agendaId);
+    }
+
+    @Test
+    @DisplayName("Deve obter resultado rejeitado")
+    void shouldGetRejectedResult() {
+        VotingResultResult result = new VotingResultResult(
+                agendaId,
+                SessionStatus.CLOSED,
+                2L,
+                5L,
+                7L,
+                VotingResult.REJECTED
+        );
+
+        when(getResultUseCase.getResult(agendaId)).thenReturn(result);
+
+        ResponseEntity<VotingResultResult> response = controller.getResult(agendaId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(VotingResult.REJECTED, response.getBody().result());
+        verify(getResultUseCase).getResult(agendaId);
+    }
 }
 

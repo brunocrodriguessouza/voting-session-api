@@ -13,3 +13,4 @@ public record UserInfoResponse(
     public static final String UNABLE_TO_VOTE = "UNABLE_TO_VOTE";
 }
 
+

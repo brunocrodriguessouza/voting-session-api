@@ -12,3 +12,4 @@ public interface VotingSessionJpaRepository extends JpaRepository<VotingSessionE
     Optional<VotingSessionEntity> findByAgendaId(UUID agendaId);
 }
 
+

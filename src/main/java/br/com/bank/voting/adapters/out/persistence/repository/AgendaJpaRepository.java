@@ -10,3 +10,4 @@ import java.util.UUID;
 public interface AgendaJpaRepository extends JpaRepository<AgendaEntity, UUID> {
 }
 
+

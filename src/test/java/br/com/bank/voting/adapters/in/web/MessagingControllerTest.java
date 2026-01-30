@@ -101,5 +101,41 @@ class MessagingControllerTest {
         assertTrue(response.getBody().containsKey("description"));
         verify(messageQueue).getMessageCount();
     }
+
+    @Test
+    @DisplayName("Deve retornar informações da fila com zero mensagens")
+    void shouldReturnQueueInfoWithZeroMessages() {
+        when(messageQueue.getMessageCount()).thenReturn(0);
+
+        ResponseEntity<Map<String, Object>> response = controller.getQueueInfo();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().get("messageCount"));
+        verify(messageQueue).getMessageCount();
+    }
+
+    @Test
+    @DisplayName("Deve retornar múltiplas mensagens")
+    void shouldReturnMultipleMessages() {
+        VotingResultResult result1 = new VotingResultResult(
+                UUID.randomUUID(), SessionStatus.CLOSED, 5L, 3L, 8L, VotingResult.APPROVED
+        );
+        VotingResultResult result2 = new VotingResultResult(
+                UUID.randomUUID(), SessionStatus.CLOSED, 10L, 2L, 12L, VotingResult.APPROVED
+        );
+        
+        InMemoryMessageQueue.PublishedResult published1 = 
+                new InMemoryMessageQueue.PublishedResult(result1, LocalDateTime.now());
+        InMemoryMessageQueue.PublishedResult published2 = 
+                new InMemoryMessageQueue.PublishedResult(result2, LocalDateTime.now());
+        
+        when(messageQueue.getAllMessages()).thenReturn(Arrays.asList(published1, published2));
+
+        ResponseEntity<List<PublishedResultResponse>> response = controller.getMessages();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(2, response.getBody().size());
+        verify(messageQueue).getAllMessages();
+    }
 }
 

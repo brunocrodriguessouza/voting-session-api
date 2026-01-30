@@ -6,3 +6,4 @@ public interface VoteUseCase {
     void vote(VoteCommand command);
 }
 
+

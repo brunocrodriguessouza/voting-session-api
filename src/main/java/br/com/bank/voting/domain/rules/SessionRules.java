@@ -10,6 +10,10 @@ import java.time.LocalDateTime;
  */
 public class SessionRules {
 
+    private SessionRules() {
+        // Utility class - não deve ser instanciada
+    }
+
     /**
      * Verifica se uma sessão de votação está aberta no momento atual.
      *

@@ -62,14 +62,14 @@ class AgendaJpaAdapterTest {
     @DisplayName("Deve salvar agenda sem ID e permitir JPA gerar")
     void shouldSaveAgendaWithoutId() {
         Agenda agendaWithoutId = new Agenda(null, "Nova Pauta", LocalDateTime.now());
-        AgendaEntity savedEntity = new AgendaEntity(agendaId, "Nova Pauta", agendaWithoutId.getCreatedAt());
+        AgendaEntity expectedEntity = new AgendaEntity(agendaId, "Nova Pauta", agendaWithoutId.getCreatedAt());
         
-        when(repository.save(any(AgendaEntity.class))).thenReturn(savedEntity);
+        when(repository.save(any(AgendaEntity.class))).thenReturn(expectedEntity);
 
         Agenda saved = adapter.save(agendaWithoutId);
 
         assertNotNull(saved.getId());
-        verify(repository).save(argThat(entity -> entity.getId() == null));
+        verify(repository).save(argThat(entityToSave -> entityToSave.getId() == null));
     }
 
     @Test
@@ -113,15 +113,34 @@ class AgendaJpaAdapterTest {
     @Test
     @DisplayName("Deve converter corretamente de Domain para Entity")
     void shouldConvertDomainToEntityCorrectly() {
-        AgendaEntity savedEntity = new AgendaEntity(agendaId, domainAgenda.getTitle(), domainAgenda.getCreatedAt());
+        AgendaEntity expectedEntity = new AgendaEntity(agendaId, domainAgenda.getTitle(), domainAgenda.getCreatedAt());
+        when(repository.save(any(AgendaEntity.class))).thenReturn(expectedEntity);
+
+        adapter.save(domainAgenda);
+
+        verify(repository).save(argThat(entityToSave -> 
+            entityToSave.getTitle().equals(domainAgenda.getTitle()) &&
+            entityToSave.getCreatedAt().equals(domainAgenda.getCreatedAt())
+        ));
+    }
+
+    @Test
+    @DisplayName("Deve salvar agenda com ID existente")
+    void shouldSaveAgendaWithExistingId() {
+        Agenda agendaWithId = new Agenda(agendaId, "Pauta com ID", LocalDateTime.now());
+        AgendaEntity savedEntity = new AgendaEntity(agendaId, "Pauta com ID", agendaWithId.getCreatedAt());
+        
         when(repository.save(any(AgendaEntity.class))).thenReturn(savedEntity);
 
-        Agenda saved = adapter.save(domainAgenda);
+        Agenda saved = adapter.save(agendaWithId);
 
-        verify(repository).save(argThat(entity -> 
-            entity.getTitle().equals(domainAgenda.getTitle()) &&
-            entity.getCreatedAt().equals(domainAgenda.getCreatedAt())
+        assertNotNull(saved);
+        assertEquals(agendaId, saved.getId());
+        verify(repository).save(argThat(entityToSave -> 
+            entityToSave.getId() != null &&
+            entityToSave.getId().equals(agendaId)
         ));
     }
 }
+
 

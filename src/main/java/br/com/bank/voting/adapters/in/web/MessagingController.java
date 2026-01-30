@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Controller REST para visualização de mensagens publicadas na fila (Bônus 2).
@@ -50,7 +49,7 @@ public class MessagingController {
                         published.result(),
                         published.publishedAt()
                 ))
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(messages);
     }
 

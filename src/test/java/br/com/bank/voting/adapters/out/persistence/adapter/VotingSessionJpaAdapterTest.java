@@ -68,15 +68,15 @@ class VotingSessionJpaAdapterTest {
     void shouldSaveSessionWithoutId() {
         VotingSession sessionWithoutId = new VotingSession(null, agendaId, 
                 LocalDateTime.now(), LocalDateTime.now().plusMinutes(1));
-        VotingSessionEntity savedEntity = new VotingSessionEntity(sessionId, agendaId, 
+        VotingSessionEntity expectedEntity = new VotingSessionEntity(sessionId, agendaId, 
                 sessionWithoutId.getOpenedAt(), sessionWithoutId.getClosesAt());
         
-        when(repository.save(any(VotingSessionEntity.class))).thenReturn(savedEntity);
+        when(repository.save(any(VotingSessionEntity.class))).thenReturn(expectedEntity);
 
         VotingSession saved = adapter.save(sessionWithoutId);
 
         assertNotNull(saved.getId());
-        verify(repository).save(argThat(entity -> entity.getId() == null));
+        verify(repository).save(argThat(entityToSave -> entityToSave.getId() == null));
     }
 
     @Test
@@ -121,17 +121,38 @@ class VotingSessionJpaAdapterTest {
     @Test
     @DisplayName("Deve converter corretamente de Domain para Entity")
     void shouldConvertDomainToEntityCorrectly() {
-        VotingSessionEntity savedEntity = new VotingSessionEntity(sessionId, 
+        VotingSessionEntity expectedEntity = new VotingSessionEntity(sessionId, 
                 domainSession.getAgendaId(), domainSession.getOpenedAt(), domainSession.getClosesAt());
-        when(repository.save(any(VotingSessionEntity.class))).thenReturn(savedEntity);
+        when(repository.save(any(VotingSessionEntity.class))).thenReturn(expectedEntity);
 
         adapter.save(domainSession);
 
-        verify(repository).save(argThat(entity -> 
-            entity.getAgendaId().equals(domainSession.getAgendaId()) &&
-            entity.getOpenedAt().equals(domainSession.getOpenedAt()) &&
-            entity.getClosesAt().equals(domainSession.getClosesAt())
+        verify(repository).save(argThat(entityToSave -> 
+            entityToSave.getAgendaId().equals(domainSession.getAgendaId()) &&
+            entityToSave.getOpenedAt().equals(domainSession.getOpenedAt()) &&
+            entityToSave.getClosesAt().equals(domainSession.getClosesAt())
+        ));
+    }
+
+    @Test
+    @DisplayName("Deve salvar sessão com ID existente")
+    void shouldSaveSessionWithExistingId() {
+        VotingSession sessionWithId = new VotingSession(sessionId, agendaId, 
+                LocalDateTime.now(), LocalDateTime.now().plusMinutes(5));
+        VotingSessionEntity savedEntity = new VotingSessionEntity(sessionId, agendaId, 
+                sessionWithId.getOpenedAt(), sessionWithId.getClosesAt());
+        
+        when(repository.save(any(VotingSessionEntity.class))).thenReturn(savedEntity);
+
+        VotingSession saved = adapter.save(sessionWithId);
+
+        assertNotNull(saved);
+        assertEquals(sessionId, saved.getId());
+        verify(repository).save(argThat(entityToSave -> 
+            entityToSave.getId() != null &&
+            entityToSave.getId().equals(sessionId)
         ));
     }
 }
+
 

@@ -3,7 +3,6 @@ package br.com.bank.voting.adapters.out.external;
 import br.com.bank.voting.application.port.out.VoterEligibilityPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +19,10 @@ public class MockUserInfoClientAdapter implements VoterEligibilityPort {
 
     @Override
     public boolean isEligibleToVote(String cpf) {
-        log.warn("Mock adapter: Skipping external validation for CPF: {}", maskCpf(cpf));
-        log.warn("In production, this should use the real external service!");
+        if (log.isWarnEnabled()) {
+            log.warn("Mock adapter: Skipping external validation for CPF: {}", maskCpf(cpf));
+            log.warn("In production, this should use the real external service!");
+        }
         // Em modo mock, sempre retorna true (considera elegível)
         return true;
     }
@@ -33,4 +34,5 @@ public class MockUserInfoClientAdapter implements VoterEligibilityPort {
         return "***" + cpf.substring(cpf.length() - 4);
     }
 }
+
 

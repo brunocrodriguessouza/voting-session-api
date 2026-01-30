@@ -10,3 +10,4 @@ public interface SessionRepositoryPort {
     Optional<VotingSession> findByAgendaId(UUID agendaId);
 }
 
+

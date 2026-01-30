@@ -80,4 +80,22 @@ class VoteControllerTest {
                 command.choice() == VoteChoice.YES
         ));
     }
+
+    @Test
+    @DisplayName("Deve criar VoteRequest com todos os campos")
+    void shouldCreateVoteRequestWithAllFields() {
+        VoteController.VoteRequest request = new VoteController.VoteRequest(cpf, VoteChoice.NO);
+
+        assertEquals(cpf, request.cpf());
+        assertEquals(VoteChoice.NO, request.choice());
+    }
+
+    @Test
+    @DisplayName("Deve criar VoteRequest com CPF null")
+    void shouldCreateVoteRequestWithNullCpf() {
+        VoteController.VoteRequest request = new VoteController.VoteRequest(null, VoteChoice.YES);
+
+        assertNull(request.cpf());
+        assertEquals(VoteChoice.YES, request.choice());
+    }
 }

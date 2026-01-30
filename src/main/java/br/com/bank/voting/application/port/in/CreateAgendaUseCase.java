@@ -7,3 +7,4 @@ public interface CreateAgendaUseCase {
     AgendaCreatedResult create(CreateAgendaCommand command);
 }
 
+

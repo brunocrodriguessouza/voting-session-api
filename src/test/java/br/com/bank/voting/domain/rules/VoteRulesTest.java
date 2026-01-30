@@ -126,5 +126,43 @@ class VoteRulesTest {
 
         assertEquals(5, count);
     }
+
+    @Test
+    @DisplayName("Deve retornar true quando CPF está no primeiro voto")
+    void shouldReturnTrueWhenCpfIsInFirstVote() {
+        String cpf = "12345678901";
+        List<Vote> votes = Arrays.asList(
+            new Vote(UUID.randomUUID(), agendaId, cpf, VoteChoice.YES, LocalDateTime.now()),
+            new Vote(UUID.randomUUID(), agendaId, "98765432109", VoteChoice.NO, LocalDateTime.now())
+        );
+
+        assertTrue(VoteRules.hasAlreadyVoted(votes, cpf));
+    }
+
+    @Test
+    @DisplayName("Deve retornar true quando CPF está no último voto")
+    void shouldReturnTrueWhenCpfIsInLastVote() {
+        String cpf = "12345678901";
+        List<Vote> votes = Arrays.asList(
+            new Vote(UUID.randomUUID(), agendaId, "98765432109", VoteChoice.YES, LocalDateTime.now()),
+            new Vote(UUID.randomUUID(), agendaId, cpf, VoteChoice.NO, LocalDateTime.now())
+        );
+
+        assertTrue(VoteRules.hasAlreadyVoted(votes, cpf));
+    }
+
+    @Test
+    @DisplayName("Deve retornar true quando CPF está no meio da lista")
+    void shouldReturnTrueWhenCpfIsInMiddleOfList() {
+        String cpf = "12345678901";
+        List<Vote> votes = Arrays.asList(
+            new Vote(UUID.randomUUID(), agendaId, "11111111111", VoteChoice.YES, LocalDateTime.now()),
+            new Vote(UUID.randomUUID(), agendaId, cpf, VoteChoice.NO, LocalDateTime.now()),
+            new Vote(UUID.randomUUID(), agendaId, "22222222222", VoteChoice.YES, LocalDateTime.now())
+        );
+
+        assertTrue(VoteRules.hasAlreadyVoted(votes, cpf));
+    }
 }
+
 
