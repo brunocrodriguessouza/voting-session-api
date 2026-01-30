@@ -5,6 +5,8 @@ import br.com.bank.voting.application.dto.result.SessionOpenedResult;
 import br.com.bank.voting.application.port.in.OpenSessionUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,11 @@ public class SessionController {
      */
     @PostMapping
     @Operation(summary = "Abrir sessão", description = "Abre uma sessão de votação para uma pauta. Duração padrão: 1 minuto")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Sessão aberta com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Pauta não encontrada"),
+            @ApiResponse(responseCode = "409", description = "Já existe uma sessão aberta para esta pauta")
+    })
     public ResponseEntity<SessionOpenedResult> openSession(
             @Parameter(description = "ID da pauta") @PathVariable UUID agendaId,
             @Parameter(description = "Duração da sessão em minutos (opcional, padrão: 1)") 

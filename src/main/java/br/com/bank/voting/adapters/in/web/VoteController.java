@@ -5,6 +5,8 @@ import br.com.bank.voting.application.port.in.VoteUseCase;
 import br.com.bank.voting.domain.model.enums.VoteChoice;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -40,7 +42,15 @@ public class VoteController {
      * @return resposta HTTP 204 (No Content) em caso de sucesso
      */
     @PostMapping
-    @Operation(summary = "Registrar voto", description = "Registra um voto (SIM ou NÃO) de um associado em uma pauta")
+    @Operation(summary = "Registrar voto", description = "Registra um voto (SIM ou NÃO) de um associado em uma pauta. Valida elegibilidade via serviço externo (Bônus 1)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Voto registrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "CPF inválido ou dados inválidos"),
+            @ApiResponse(responseCode = "403", description = "Associado não elegível para votar"),
+            @ApiResponse(responseCode = "404", description = "Pauta ou sessão não encontrada"),
+            @ApiResponse(responseCode = "409", description = "Associado já votou nesta pauta"),
+            @ApiResponse(responseCode = "503", description = "Serviço externo de validação indisponível")
+    })
     public ResponseEntity<Void> vote(
             @Parameter(description = "ID da pauta") @PathVariable UUID agendaId,
             @Valid @RequestBody VoteRequest request) {

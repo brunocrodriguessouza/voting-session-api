@@ -3,6 +3,8 @@ package br.com.bank.voting.adapters.in.web;
 import br.com.bank.voting.adapters.in.web.dto.PublishedResultResponse;
 import br.com.bank.voting.adapters.out.messaging.InMemoryMessageQueue;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,10 @@ public class MessagingController {
      * @return lista de resultados publicados
      */
     @GetMapping("/messages")
-    @Operation(summary = "Listar mensagens", description = "Retorna todas as mensagens publicadas na fila in-memory")
+    @Operation(summary = "Listar mensagens", description = "Retorna todas as mensagens publicadas na fila in-memory (Bônus 2)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de mensagens retornada com sucesso")
+    })
     public ResponseEntity<List<PublishedResultResponse>> getMessages() {
         log.info("Retrieving all messages from queue");
         List<PublishedResultResponse> messages = messageQueue.getAllMessages().stream()
@@ -55,7 +60,10 @@ public class MessagingController {
      * @return informações da fila (quantidade de mensagens)
      */
     @GetMapping("/queue-info")
-    @Operation(summary = "Informações da fila", description = "Retorna informações sobre a fila de mensagens")
+    @Operation(summary = "Informações da fila", description = "Retorna informações sobre a fila de mensagens (quantidade de mensagens, tipo de fila)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Informações da fila retornadas com sucesso")
+    })
     public ResponseEntity<Map<String, Object>> getQueueInfo() {
         int messageCount = messageQueue.getMessageCount();
         return ResponseEntity.ok(Map.of(
