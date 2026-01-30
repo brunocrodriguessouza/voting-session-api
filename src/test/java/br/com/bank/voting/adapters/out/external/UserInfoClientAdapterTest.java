@@ -5,6 +5,9 @@ import br.com.bank.voting.adapters.out.external.exception.InvalidCpfException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Method;
 
@@ -97,24 +100,15 @@ class UserInfoClientAdapterTest {
         assertNull(exception.getCause());
     }
 
-    @Test
-    @DisplayName("Deve mascarar CPF corretamente quando CPF é null")
-    void shouldMaskCpfCorrectlyWhenCpfIsNull() throws Exception {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"1", "12", "123"})
+    @DisplayName("Deve mascarar CPF corretamente quando CPF é null, vazio ou tem menos de 4 caracteres")
+    void shouldMaskCpfCorrectlyWhenCpfIsNullOrEmptyOrHasLessThan4Characters(String cpf) throws Exception {
         Method maskCpfMethod = UserInfoClientAdapter.class.getDeclaredMethod("maskCpf", String.class);
         maskCpfMethod.setAccessible(true);
         
-        String result = (String) maskCpfMethod.invoke(adapter, (String) null);
-        
-        assertEquals("***", result);
-    }
-
-    @Test
-    @DisplayName("Deve mascarar CPF corretamente quando CPF tem menos de 4 caracteres")
-    void shouldMaskCpfCorrectlyWhenCpfHasLessThan4Characters() throws Exception {
-        Method maskCpfMethod = UserInfoClientAdapter.class.getDeclaredMethod("maskCpf", String.class);
-        maskCpfMethod.setAccessible(true);
-        
-        String result = (String) maskCpfMethod.invoke(adapter, "123");
+        String result = (String) maskCpfMethod.invoke(adapter, cpf);
         
         assertEquals("***", result);
     }
@@ -143,15 +137,5 @@ class UserInfoClientAdapterTest {
         assertEquals("***1234", result);
     }
 
-    @Test
-    @DisplayName("Deve mascarar CPF corretamente quando CPF está vazio")
-    void shouldMaskCpfCorrectlyWhenCpfIsEmpty() throws Exception {
-        Method maskCpfMethod = UserInfoClientAdapter.class.getDeclaredMethod("maskCpf", String.class);
-        maskCpfMethod.setAccessible(true);
-        
-        String result = (String) maskCpfMethod.invoke(adapter, "");
-        
-        assertEquals("***", result);
-    }
 }
 

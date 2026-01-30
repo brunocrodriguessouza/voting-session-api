@@ -139,7 +139,6 @@
 						<exclude>**/adapters/out/external/dto/**</exclude>
 						<exclude>**/adapters/out/external/UserInfoClientAdapter.java</exclude>
 						<exclude>**/adapters/out/external/dto/UserInfoResponse.java</exclude>
-						<exclude>**/adapters/in/web/ExternalServiceTestController.java</exclude>
 						<exclude>**/*Application.java</exclude>
 						<exclude>**/VotingSessionApiApplication.java</exclude>
 					</excludes>

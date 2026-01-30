@@ -28,11 +28,12 @@ class VoteRulesTest {
     void shouldReturnTrueWhenAssociateAlreadyVoted() {
         String cpf = "12345678901";
         List<Vote> votes = Arrays.asList(
+            new Vote(UUID.randomUUID(), agendaId, "98765432109", VoteChoice.NO, LocalDateTime.now()),
             new Vote(UUID.randomUUID(), agendaId, cpf, VoteChoice.YES, LocalDateTime.now()),
-            new Vote(UUID.randomUUID(), agendaId, "98765432109", VoteChoice.NO, LocalDateTime.now())
+            new Vote(UUID.randomUUID(), agendaId, "11111111111", VoteChoice.NO, LocalDateTime.now())
         );
 
-        assertTrue(VoteRules.hasAlreadyVoted(votes, cpf));
+        assertTrue(VoteRules.hasAlreadyVoted(votes, cpf), "Deve retornar true quando CPF está na lista de votos");
     }
 
     @Test
@@ -136,7 +137,7 @@ class VoteRulesTest {
             new Vote(UUID.randomUUID(), agendaId, "98765432109", VoteChoice.NO, LocalDateTime.now())
         );
 
-        assertTrue(VoteRules.hasAlreadyVoted(votes, cpf));
+        assertTrue(VoteRules.hasAlreadyVoted(votes, cpf), "Deve retornar true quando CPF está no primeiro voto da lista");
     }
 
     @Test
