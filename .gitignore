@@ -58,6 +58,10 @@ Thumbs.db
 coverage/
 *.lcov
 jacoco.exec
+target/site/jacoco/
+target/jacoco.exec
+target/surefire-reports/
+target/failsafe-reports/
 
 ### Temporary files ###
 *.tmp

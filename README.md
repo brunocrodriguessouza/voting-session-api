@@ -84,6 +84,30 @@ mvn test
 
 Cobertura de testes unitários para serviços, regras de negócio e adapters.
 
+### Cobertura de Código (JaCoCo)
+
+Para gerar relatório de cobertura:
+
+```bash
+mvn clean test jacoco:report
+```
+
+O relatório estará disponível em: `target/site/jacoco/index.html`
+
+### SonarQube
+
+Para executar análise do SonarQube:
+
+```bash
+# Gerar relatório de cobertura primeiro
+mvn clean test jacoco:report
+
+# Executar análise SonarQube
+mvn sonar:sonar
+```
+
+**Nota:** É necessário ter o SonarQube Server rodando ou configurar as propriedades de conexão. As configurações estão em `sonar-project.properties`.
+
 ## Estrutura
 
 ```
