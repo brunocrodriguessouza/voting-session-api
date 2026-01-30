@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "voting-session-api-collection",
 		"name": "Voting Session API",
-		"description": "Collection para testar a API de gerenciamento de sessões de votação",
+		"description": "Collection para testar a API de gerenciamento de sessões de votação.\n\nFuncionalidades:\n- Criar pautas\n- Abrir sessões de votação\n- Registrar votos (com validação de elegibilidade - Bônus 1)\n- Obter resultados\n- Visualizar mensagens publicadas na fila (Bônus 2)\n\nFluxo recomendado:\n1. Criar Pauta\n2. Abrir Sessão\n3. Registrar Votos\n4. Aguardar sessão fechar\n5. Obter Resultado (publica na fila automaticamente)\n6. Verificar Mensagens Publicadas",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -131,6 +131,34 @@
 						"description": "Abre uma sessão de votação com duração customizada de 5 minutos"
 					},
 					"response": []
+				},
+				{
+					"name": "Abrir Sessão (10 segundos - teste rápido)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/agendas/{{agendaId}}/sessions?durationMinutes=0.16",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"agendas",
+								"{{agendaId}}",
+								"sessions"
+							],
+							"query": [
+								{
+									"key": "durationMinutes",
+									"value": "0.16"
+								}
+							]
+						},
+						"description": "Abre uma sessão de 10 segundos para testes rápidos (útil para testar publicação na fila sem esperar 1 minuto)"
+					},
+					"response": []
 				}
 			],
 			"description": "Endpoints relacionados a sessões de votação"
@@ -165,7 +193,7 @@
 								"votes"
 							]
 						},
-						"description": "Registra um voto SIM para a pauta"
+						"description": "Registra um voto SIM para a pauta. O CPF será validado pela API externa (Bônus 1)."
 					},
 					"response": []
 				},
@@ -196,12 +224,12 @@
 								"votes"
 							]
 						},
-						"description": "Registra um voto NÃO para a pauta"
+						"description": "Registra um voto NÃO para a pauta. O CPF será validado pela API externa (Bônus 1)."
 					},
 					"response": []
 				}
 			],
-			"description": "Endpoints relacionados a votos"
+			"description": "Endpoints relacionados a votos. Validação de elegibilidade via API externa (Bônus 1)."
 		},
 		{
 			"name": "Fluxo Completo",
@@ -384,12 +412,34 @@
 								"{{agendaId}}",
 								"result"
 							]
-						}
+						},
+						"description": "Obtém o resultado da votação. Se a sessão estiver fechada, o resultado será automaticamente publicado na fila (Bônus 2)."
+					},
+					"response": []
+				},
+				{
+					"name": "7. Verificar Mensagens Publicadas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messaging/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messaging",
+								"messages"
+							]
+						},
+						"description": "Verifica se o resultado foi publicado na fila in-memory após a sessão fechar (Bônus 2)."
 					},
 					"response": []
 				}
 			],
-			"description": "Fluxo completo de teste: criar pauta, abrir sessão, votar e ver resultado"
+			"description": "Fluxo completo de teste: criar pauta, abrir sessão, votar, ver resultado e verificar publicação na fila"
 		},
 		{
 			"name": "Messaging (Bônus 2)",
@@ -411,7 +461,7 @@
 								"messages"
 							]
 						},
-						"description": "Retorna todas as mensagens publicadas na fila in-memory (Bônus 2). As mensagens são publicadas automaticamente quando uma sessão fecha."
+						"description": "Retorna todas as mensagens publicadas na fila in-memory (Bônus 2).\n\nAs mensagens são publicadas automaticamente quando:\n- Uma sessão fecha (tempo expira)\n- E você chama GET /api/v1/agendas/{id}/result\n\nCada mensagem contém:\n- Resultado completo da votação\n- Timestamp de publicação"
 					},
 					"response": []
 				},
@@ -433,6 +483,27 @@
 							]
 						},
 						"description": "Retorna informações sobre a fila de mensagens (quantidade de mensagens, tipo, etc.)"
+					},
+					"response": []
+				},
+				{
+					"name": "Fluxo: Verificar Publicação na Fila",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messaging/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messaging",
+								"messages"
+							]
+						},
+						"description": "Use este endpoint após obter o resultado de uma sessão fechada para verificar se foi publicado na fila. Passos: 1) Criar pauta, 2) Abrir sessão, 3) Votar, 4) Aguardar sessão fechar, 5) Obter resultado, 6) Verificar mensagens aqui."
 					},
 					"response": []
 				}
