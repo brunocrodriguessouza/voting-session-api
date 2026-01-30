@@ -27,7 +27,7 @@ A aplicação sobe em `http://localhost:8080`
 
 ## Documentação
 
-Swagger UI disponível em: `http://localhost:8080/swagger-ui.html`
+Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 ## Bônus implementados
 
