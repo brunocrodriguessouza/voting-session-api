@@ -390,6 +390,54 @@
 				}
 			],
 			"description": "Fluxo completo de teste: criar pauta, abrir sessão, votar e ver resultado"
+		},
+		{
+			"name": "Messaging (Bônus 2)",
+			"item": [
+				{
+					"name": "Listar Mensagens Publicadas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messaging/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messaging",
+								"messages"
+							]
+						},
+						"description": "Retorna todas as mensagens publicadas na fila in-memory (Bônus 2). As mensagens são publicadas automaticamente quando uma sessão fecha."
+					},
+					"response": []
+				},
+				{
+					"name": "Informações da Fila",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/messaging/queue-info",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"messaging",
+								"queue-info"
+							]
+						},
+						"description": "Retorna informações sobre a fila de mensagens (quantidade de mensagens, tipo, etc.)"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para visualização de mensagens publicadas na fila in-memory (Bônus 2)"
 		}
 	],
 	"variable": [

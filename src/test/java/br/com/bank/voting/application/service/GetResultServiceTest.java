@@ -2,6 +2,7 @@ package br.com.bank.voting.application.service;
 
 import br.com.bank.voting.application.dto.result.VotingResultResult;
 import br.com.bank.voting.application.port.out.AgendaRepositoryPort;
+import br.com.bank.voting.application.port.out.ResultPublisherPort;
 import br.com.bank.voting.application.port.out.SessionRepositoryPort;
 import br.com.bank.voting.application.port.out.VoteRepositoryPort;
 import br.com.bank.voting.domain.model.Agenda;
@@ -40,6 +41,9 @@ class GetResultServiceTest {
 
     @Mock
     private VoteRepositoryPort voteRepository;
+
+    @Mock
+    private ResultPublisherPort resultPublisherPort;
 
     @InjectMocks
     private GetResultService getResultService;
@@ -209,6 +213,76 @@ class GetResultServiceTest {
         assertEquals(0L, result.yes());
         assertEquals(3L, result.no());
         assertEquals(3L, result.total());
+    }
+
+    @Test
+    @DisplayName("Deve publicar resultado quando sessão está fechada")
+    void shouldPublishResultWhenSessionIsClosed() {
+        List<Vote> votes = Arrays.asList(
+            new Vote(UUID.randomUUID(), agendaId, "11111111111", VoteChoice.YES, LocalDateTime.now()),
+            new Vote(UUID.randomUUID(), agendaId, "22222222222", VoteChoice.NO, LocalDateTime.now())
+        );
+
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(closedSession));
+        when(voteRepository.findAllByAgendaId(agendaId)).thenReturn(votes);
+
+        VotingResultResult result = getResultService.getResult(agendaId);
+
+        verify(resultPublisherPort, times(1)).publishResult(result);
+    }
+
+    @Test
+    @DisplayName("Não deve publicar resultado quando sessão está aberta")
+    void shouldNotPublishResultWhenSessionIsOpen() {
+        List<Vote> votes = Arrays.asList(
+            new Vote(UUID.randomUUID(), agendaId, "11111111111", VoteChoice.YES, LocalDateTime.now())
+        );
+
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(openSession));
+        when(voteRepository.findAllByAgendaId(agendaId)).thenReturn(votes);
+
+        getResultService.getResult(agendaId);
+
+        verify(resultPublisherPort, never()).publishResult(any());
+    }
+
+    @Test
+    @DisplayName("Não deve publicar resultado duplicado quando já foi publicado")
+    void shouldNotPublishDuplicateResult() {
+        List<Vote> votes = Collections.emptyList();
+
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(closedSession));
+        when(voteRepository.findAllByAgendaId(agendaId)).thenReturn(votes);
+
+        // Primeira chamada - deve publicar
+        getResultService.getResult(agendaId);
+        verify(resultPublisherPort, times(1)).publishResult(any());
+
+        // Segunda chamada - não deve publicar novamente
+        getResultService.getResult(agendaId);
+        verify(resultPublisherPort, times(1)).publishResult(any());
+    }
+
+    @Test
+    @DisplayName("Deve tratar erro de publicação sem quebrar o fluxo")
+    void shouldHandlePublishErrorWithoutBreakingFlow() {
+        List<Vote> votes = Collections.emptyList();
+
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(closedSession));
+        when(voteRepository.findAllByAgendaId(agendaId)).thenReturn(votes);
+        doThrow(new RuntimeException("Publish error")).when(resultPublisherPort).publishResult(any());
+
+        // Não deve lançar exceção
+        assertDoesNotThrow(() -> {
+            VotingResultResult result = getResultService.getResult(agendaId);
+            assertNotNull(result);
+        });
+
+        verify(resultPublisherPort, times(1)).publishResult(any());
     }
 }
 

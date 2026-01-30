@@ -24,6 +24,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("VoteService Tests")
@@ -189,6 +190,51 @@ class VoteServiceTest {
 
         verify(voterEligibilityPort).isEligibleToVote(cpf);
         verify(voteRepository).save(any(Vote.class));
+    }
+
+    @Test
+    @DisplayName("Deve verificar elegibilidade na ordem correta (após validar sessão e voto duplicado)")
+    void shouldCheckEligibilityInCorrectOrder() {
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(openSession));
+        when(voteRepository.findByAgendaIdAndCpf(agendaId, cpf)).thenReturn(Optional.empty());
+        when(voterEligibilityPort.isEligibleToVote(cpf)).thenReturn(true);
+        when(voteRepository.save(any(Vote.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        voteService.vote(voteYesCommand);
+
+        // Verifica ordem: agenda -> sessão -> voto duplicado -> elegibilidade -> salvar
+        var inOrder = inOrder(agendaRepository, sessionRepository, voteRepository, voterEligibilityPort);
+        inOrder.verify(agendaRepository).findById(agendaId);
+        inOrder.verify(sessionRepository).findByAgendaId(agendaId);
+        inOrder.verify(voteRepository).findByAgendaIdAndCpf(agendaId, cpf);
+        inOrder.verify(voterEligibilityPort).isEligibleToVote(cpf);
+        inOrder.verify(voteRepository).save(any(Vote.class));
+    }
+
+    @Test
+    @DisplayName("Não deve verificar elegibilidade se sessão estiver fechada")
+    void shouldNotCheckEligibilityWhenSessionIsClosed() {
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(closedSession));
+
+        assertThrows(IllegalStateException.class, () -> voteService.vote(voteYesCommand));
+
+        verify(voterEligibilityPort, never()).isEligibleToVote(any());
+    }
+
+    @Test
+    @DisplayName("Não deve verificar elegibilidade se associado já votou")
+    void shouldNotCheckEligibilityWhenAssociateAlreadyVoted() {
+        Vote existingVote = new Vote(UUID.randomUUID(), agendaId, cpf, VoteChoice.YES, LocalDateTime.now());
+
+        when(agendaRepository.findById(agendaId)).thenReturn(Optional.of(agenda));
+        when(sessionRepository.findByAgendaId(agendaId)).thenReturn(Optional.of(openSession));
+        when(voteRepository.findByAgendaIdAndCpf(agendaId, cpf)).thenReturn(Optional.of(existingVote));
+
+        assertThrows(IllegalStateException.class, () -> voteService.vote(voteYesCommand));
+
+        verify(voterEligibilityPort, never()).isEligibleToVote(any());
     }
 }
 
