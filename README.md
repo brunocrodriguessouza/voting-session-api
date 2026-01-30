@@ -29,6 +29,18 @@ A aplicação sobe em `http://localhost:8080`
 
 Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
+## Collection Postman
+
+A collection do Postman com todos os endpoints e fluxo completo está disponível em:
+- `Voting-Session-API.postman_collection.json` - Collection com todos os endpoints
+- `Voting-Session-API.postman_environment.json` - Ambiente local
+
+A collection inclui:
+- Fluxo completo automatizado (criar pauta → abrir sessão → votar → obter resultado → verificar mensagens)
+- Endpoints organizados por funcionalidade
+- Variáveis automáticas (agendaId é salvo automaticamente)
+- Exemplos de requisições prontas para uso
+
 ## Bônus implementados
 
 ### Bônus 1: Validação de Elegibilidade
