@@ -94,19 +94,28 @@ mvn clean test jacoco:report
 
 O relatório estará disponível em: `target/site/jacoco/index.html`
 
-### SonarQube
+### SonarQube (Opcional)
 
-Para executar análise do SonarQube:
+Para executar análise do SonarQube, você precisa de um servidor SonarQube ou usar o SonarCloud (gratuito):
 
+**Opção 1: Usar SonarCloud (recomendado - gratuito)**
+1. Crie uma conta em https://sonarcloud.io
+2. Crie um projeto e obtenha o token
+3. Execute:
 ```bash
-# Gerar relatório de cobertura primeiro
 mvn clean test jacoco:report
-
-# Executar análise SonarQube
-mvn sonar:sonar
+mvn sonar:sonar -Dsonar.login=SEU_TOKEN -Dsonar.organization=SUA_ORG -Dsonar.projectKey=SEU_PROJECT_KEY
 ```
 
-**Nota:** É necessário ter o SonarQube Server rodando ou configurar as propriedades de conexão. As configurações estão em `sonar-project.properties`.
+**Opção 2: SonarQube Server local**
+1. Baixe e inicie o SonarQube Server
+2. Execute:
+```bash
+mvn clean test jacoco:report
+mvn sonar:sonar -Dskip.sonar=false
+```
+
+**Nota:** Por padrão, o SonarQube está desabilitado (`skip.sonar=true`). Para habilitar, use `-Dskip.sonar=false` ou configure as propriedades em `sonar-project.properties`.
 
 ## Estrutura
 

@@ -15,7 +15,9 @@ class UserInfoClientAdapterTest {
     @DisplayName("Deve criar adapter com URL base correta")
     void shouldCreateAdapterWithBaseUrl() {
         String baseUrl = "https://user-info.herokuapp.com";
-        UserInfoClientAdapter adapter = new UserInfoClientAdapter(baseUrl);
+        int timeoutSeconds = 5;
+        
+        UserInfoClientAdapter adapter = new UserInfoClientAdapter(baseUrl, timeoutSeconds);
         
         assertNotNull(adapter);
     }

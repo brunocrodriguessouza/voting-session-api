@@ -33,6 +33,7 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.jacoco.reportPath>${project.basedir}/target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.language>java</sonar.language>
+		<skip.sonar>true</skip.sonar>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -151,11 +152,14 @@
 				</executions>
 			</plugin>
 			
-			<!-- SonarQube Maven Plugin -->
+			<!-- SonarQube Maven Plugin (opcional - requer servidor SonarQube) -->
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>3.11.0.3922</version>
+				<configuration>
+					<skip>${skip.sonar}</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
